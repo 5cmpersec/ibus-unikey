@@ -11,12 +11,11 @@
 
 typedef struct _IBusUnikeyEngine       IBusUnikeyEngine;
 typedef struct _IBusUnikeyEngineClass  IBusUnikeyEngineClass;
+typedef struct _IBusUnikeyData         IBusUnikeyData;
 
-struct _IBusUnikeyEngine
+// libunikey internal data
+struct _IBusUnikeyData
 {
-    IBusEngine parent;
-
-/* members */
     IBusPropList* prop_list;
     IBusPropList* menu_im;
     IBusPropList* menu_oc;
@@ -30,6 +29,11 @@ struct _IBusUnikeyEngine
     gboolean last_key_with_shift;
 
     std::string* preeditstr;
+};
+
+struct _IBusUnikeyEngine
+{
+    IBusEngine parent;
 };
 
 struct _IBusUnikeyEngineClass
@@ -56,7 +60,7 @@ static void ibus_unikey_engine_focus_out(IBusEngine* engine);
 static void ibus_unikey_engine_reset(IBusEngine* engine);
 static void ibus_unikey_engine_enable(IBusEngine* engine);
 static void ibus_unikey_engine_disable(IBusEngine* engine);
-static void ibus_unikey_engine_load_config(IBusUnikeyEngine* unikey);
+static void ibus_unikey_engine_load_config();
 static void ibus_unikey_config_value_changed(GSettings *settings,
                                              const gchar *key,
                                              gpointer    user_data);
@@ -69,10 +73,10 @@ static gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                                                              guint keycode,
                                                              guint modifiers);
 
-static void ibus_unikey_engine_create_property_list(IBusUnikeyEngine* unikey);
+static void ibus_unikey_engine_create_property_list();
 
 static void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible);
-static void ibus_unikey_engine_erase_chars(IBusEngine *engine, int num_chars);
+static void ibus_unikey_engine_erase_chars(int num_chars);
 
 static void ibus_unikey_engine_clean_buffer(IBusEngine* engine);
 
