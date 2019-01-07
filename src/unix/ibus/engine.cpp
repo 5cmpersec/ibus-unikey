@@ -2,7 +2,6 @@
 #include "config.h"
 #endif
 
-#include "engine.h"
 #include "engine_const.h"
 #include "engine_private.h"
 
@@ -32,40 +31,11 @@ static unsigned char WordBreakSyms[] =
     '|'
 };
 
-static IBusEngineClass* parent_class = NULL;
 static GSettings*       settings     = NULL;
-
-static IBusUnikeyEngine* unikey; // current (focus) unikey engine
 static IBusUnikeyData g_data;
 
-GType ibus_unikey_engine_get_type(void)
-{
-    static GType type = 0;
 
-    static const GTypeInfo type_info = {
-        sizeof(IBusUnikeyEngineClass),
-        (GBaseInitFunc)NULL,
-        (GBaseFinalizeFunc)NULL,
-        (GClassInitFunc)ibus_unikey_engine_class_init,
-        NULL,
-        NULL,
-        sizeof(IBusUnikeyEngine),
-        0,
-        (GInstanceInitFunc)ibus_unikey_engine_init,
-    };
-
-    if (type == 0)
-    {
-        type = g_type_register_static(IBUS_TYPE_ENGINE,
-                                      "IBusUnikeyEngine",
-                                      &type_info,
-                                      (GTypeFlags)0);
-    }
-
-    return type;
-}
-
-void ibus_unikey_init(IBusBus* bus)
+void ibus_unikey_init()
 {
     BLOG_DEBUG("ibus_unikey_init");
     UnikeySetup();
@@ -80,28 +50,8 @@ void ibus_unikey_exit()
     UnikeyCleanup();
 }
 
-static void ibus_unikey_engine_class_init(IBusUnikeyEngineClass* klass)
-{
-    BLOG_DEBUG("ibus_unikey_engine_class_init");
-    GObjectClass* object_class         = G_OBJECT_CLASS(klass);
-    IBusObjectClass* ibus_object_class = IBUS_OBJECT_CLASS(klass);
-    IBusEngineClass* engine_class      = IBUS_ENGINE_CLASS(klass);
 
-    parent_class = (IBusEngineClass* )g_type_class_peek_parent(klass);
-
-    object_class->constructor = ibus_unikey_engine_constructor;
-    ibus_object_class->destroy = (IBusObjectDestroyFunc)ibus_unikey_engine_destroy;
-
-    engine_class->process_key_event = ibus_unikey_engine_process_key_event;
-    engine_class->reset             = ibus_unikey_engine_reset;
-    engine_class->enable            = ibus_unikey_engine_enable;
-    engine_class->disable           = ibus_unikey_engine_disable;
-    engine_class->focus_in          = ibus_unikey_engine_focus_in;
-    engine_class->focus_out         = ibus_unikey_engine_focus_out;
-    engine_class->property_activate = ibus_unikey_engine_property_activate;
-}
-
-static void ibus_unikey_engine_init(IBusUnikeyEngine* unikey)
+void ibus_unikey_engine_init()
 {
     BLOG_DEBUG("ibus_unikey_engine_init");
     ibus_unikey_engine_load_config();
@@ -110,7 +60,7 @@ static void ibus_unikey_engine_init(IBusUnikeyEngine* unikey)
     ibus_unikey_engine_create_property_list();
 }
 
-static void ibus_unikey_engine_load_config()
+void ibus_unikey_engine_load_config()
 {
     BLOG_DEBUG("ibus_unikey_engine_load_config");
     gchar* str;
@@ -177,31 +127,16 @@ static void ibus_unikey_engine_load_config()
     g_free(fn);
 }
 
-static GObject* ibus_unikey_engine_constructor(GType type,
-                                               guint n_construct_params,
-                                               GObjectConstructParam* construct_params)
-{
-    BLOG_DEBUG("ibus_unikey_engine_constructor");
-    IBusUnikeyEngine* unikey;
 
-    unikey = (IBusUnikeyEngine*)
-        G_OBJECT_CLASS(parent_class)->constructor(type,
-                                                  n_construct_params,
-                                                  construct_params);
-
-    return (GObject*)unikey;
-}
-
-static void ibus_unikey_engine_destroy(IBusUnikeyEngine* unikey)
+void ibus_unikey_engine_destroy()
 {
     BLOG_DEBUG("ibus_unikey_engine_destroy");
     delete g_data.preeditstr;
     g_object_unref(g_data.prop_list);
-
-    IBUS_OBJECT_CLASS(parent_class)->destroy((IBusObject*)unikey);
 }
 
-static void ibus_unikey_engine_focus_in(IBusEngine* engine)
+
+void ibus_unikey_engine_focus_in(IBusEngine* engine)
 {
     BLOG_DEBUG("ibus_unikey_engine_focus_in");
 
@@ -210,39 +145,31 @@ static void ibus_unikey_engine_focus_in(IBusEngine* engine)
 
     UnikeySetOptions(&g_data.ukopt);
     ibus_engine_register_properties(engine, g_data.prop_list);
-
-    parent_class->focus_in(engine);
 }
 
-static void ibus_unikey_engine_focus_out(IBusEngine* engine)
+void ibus_unikey_engine_focus_out(IBusEngine* engine)
 {
     BLOG_DEBUG("ibus_unikey_engine_focus_out");
     ibus_unikey_engine_clean_buffer(engine);
-
-    parent_class->focus_out(engine);
 }
 
-static void ibus_unikey_engine_reset(IBusEngine* engine)
+void ibus_unikey_engine_reset(IBusEngine* engine)
 {
     BLOG_DEBUG("ibus_unikey_engine_reset");
     ibus_unikey_engine_clean_buffer(engine);
-
-    parent_class->reset(engine);
 }
 
-static void ibus_unikey_engine_enable(IBusEngine* engine)
+void ibus_unikey_engine_enable(IBusEngine* engine)
 {
     BLOG_DEBUG("ibus_unikey_engine_enable");
-    parent_class->enable(engine);
 }
 
-static void ibus_unikey_engine_disable(IBusEngine* engine)
+void ibus_unikey_engine_disable(IBusEngine* engine)
 {
     BLOG_DEBUG("ibus_unikey_engine_disable");
-    parent_class->disable(engine);
 }
 
-static void ibus_unikey_config_value_changed(GSettings *settings,
+void ibus_unikey_config_value_changed(GSettings *settings,
                                              const gchar *key,
                                              gpointer    user_data)
 {
@@ -252,7 +179,7 @@ static void ibus_unikey_config_value_changed(GSettings *settings,
     ibus_unikey_engine_create_property_list();
 }
 
-static void ibus_unikey_engine_property_activate(IBusEngine* engine,
+void ibus_unikey_engine_property_activate(IBusEngine* engine,
                                                  const gchar* prop_name,
                                                  guint prop_state)
 {
@@ -260,8 +187,6 @@ static void ibus_unikey_engine_property_activate(IBusEngine* engine,
     IBusProperty* prop;
     IBusText* label;
     guint i, j;
-
-    unikey = (IBusUnikeyEngine*)engine;
 
     // input method active
     if (strncmp(prop_name, CONFIG_INPUTMETHOD, strlen(CONFIG_INPUTMETHOD)) == 0)
@@ -404,7 +329,7 @@ static void ibus_unikey_engine_property_activate(IBusEngine* engine,
     UnikeySetOptions(&g_data.ukopt);
 }
 
-static void ibus_unikey_engine_create_property_list()
+void ibus_unikey_engine_create_property_list()
 {
     BLOG_DEBUG("ibus_unikey_engine_create_property_list");
     IBusProperty* prop;
@@ -589,7 +514,7 @@ static void ibus_unikey_engine_create_property_list()
 // end top menu
 }
 
-static void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible)
+void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible)
 {
     BLOG_DEBUG("ibus_unikey_engine_update_preedit_string");
     IBusText *text;
@@ -603,7 +528,7 @@ static void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const g
     ibus_engine_update_preedit_text_with_mode(engine, text, ibus_text_get_length(text), visible, IBUS_ENGINE_PREEDIT_COMMIT);
 }
 
-static void ibus_unikey_engine_erase_chars(int num_chars)
+void ibus_unikey_engine_erase_chars(int num_chars)
 {
     BLOG_DEBUG("ibus_unikey_engine_erase_chars");
     int i, k;
@@ -625,7 +550,7 @@ static void ibus_unikey_engine_erase_chars(int num_chars)
     g_data.preeditstr->erase(i+1);
 }
 
-static gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
+gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
                                                      guint keyval,
                                                      guint keycode,
                                                      guint modifiers)
@@ -648,7 +573,7 @@ static gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
     return tmp;
 }
 
-static gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
+gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                                                              guint keyval,
                                                              guint keycode,
                                                              guint modifiers)
@@ -836,14 +761,14 @@ static gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
     return false;
 }
 
-static void ibus_unikey_engine_clean_buffer(IBusEngine* engine) {
+void ibus_unikey_engine_clean_buffer(IBusEngine* engine) {
     BLOG_DEBUG("ibus_unikey_engine_clean_buffer");
     UnikeyResetBuf();
     g_data.preeditstr->clear();
     ibus_engine_hide_preedit_text(engine);    
 }
 
-static void ibus_unikey_engine_commit(IBusEngine* engine) {
+void ibus_unikey_engine_commit(IBusEngine* engine) {
     BLOG_DEBUG("ibus_unikey_engine_commit");
 
     if (g_data.preeditstr->length() > 0)

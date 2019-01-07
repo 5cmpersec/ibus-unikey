@@ -9,8 +9,6 @@
 #include "unikey.h"
 #include "vnconv.h"
 
-typedef struct _IBusUnikeyEngine       IBusUnikeyEngine;
-typedef struct _IBusUnikeyEngineClass  IBusUnikeyEngineClass;
 typedef struct _IBusUnikeyData         IBusUnikeyData;
 
 // libunikey internal data
@@ -31,56 +29,44 @@ struct _IBusUnikeyData
     std::string* preeditstr;
 };
 
-struct _IBusUnikeyEngine
-{
-    IBusEngine parent;
-};
-
-struct _IBusUnikeyEngineClass
-{
-    IBusEngineClass parent;
-};
+void ibus_unikey_init();
+void ibus_unikey_exit();
 
 // prototype
-static void ibus_unikey_engine_class_init(IBusUnikeyEngineClass* kclass);
-static void ibus_unikey_engine_init(IBusUnikeyEngine* unikey);
+void ibus_unikey_engine_init();
 
-static GObject* ibus_unikey_engine_constructor(GType type,
-                                               guint n_construct_params,
-                                               GObjectConstructParam* construct_params);
-
-static void ibus_unikey_engine_destroy(IBusUnikeyEngine* unikey);
-static gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
+void ibus_unikey_engine_destroy();
+gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
                                                      guint keyval,
                                                      guint keycode,
                                                      guint modifiers);
 
-static void ibus_unikey_engine_focus_in(IBusEngine* engine);
-static void ibus_unikey_engine_focus_out(IBusEngine* engine);
-static void ibus_unikey_engine_reset(IBusEngine* engine);
-static void ibus_unikey_engine_enable(IBusEngine* engine);
-static void ibus_unikey_engine_disable(IBusEngine* engine);
-static void ibus_unikey_engine_load_config();
-static void ibus_unikey_config_value_changed(GSettings *settings,
+void ibus_unikey_engine_focus_in(IBusEngine* engine);
+void ibus_unikey_engine_focus_out(IBusEngine* engine);
+void ibus_unikey_engine_reset(IBusEngine* engine);
+void ibus_unikey_engine_enable(IBusEngine* engine);
+void ibus_unikey_engine_disable(IBusEngine* engine);
+void ibus_unikey_engine_load_config();
+void ibus_unikey_config_value_changed(GSettings *settings,
                                              const gchar *key,
                                              gpointer    user_data);
-static void ibus_unikey_engine_property_activate(IBusEngine* engine,
+void ibus_unikey_engine_property_activate(IBusEngine* engine,
                                                  const gchar* prop_name,
                                                  guint prop_state);
 
-static gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
+gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                                                              guint keyval,
                                                              guint keycode,
                                                              guint modifiers);
 
-static void ibus_unikey_engine_create_property_list();
+void ibus_unikey_engine_create_property_list();
 
-static void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible);
-static void ibus_unikey_engine_erase_chars(int num_chars);
+void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible);
+void ibus_unikey_engine_erase_chars(int num_chars);
 
-static void ibus_unikey_engine_clean_buffer(IBusEngine* engine);
+void ibus_unikey_engine_clean_buffer(IBusEngine* engine);
 
-static void ibus_unikey_engine_commit(IBusEngine* engine);
+void ibus_unikey_engine_commit(IBusEngine* engine);
 
 #endif // __ENGINE_PRIVATE_H__
 
