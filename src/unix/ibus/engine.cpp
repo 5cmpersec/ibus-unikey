@@ -316,14 +316,6 @@ void ibus_unikey_engine_property_activate(IBusEngine* engine,
         } // end update state
     } // end MacroEnabled active
 
-    // if Run setup
-    else if (strcmp(prop_name, "RunSetupGUI") == 0)
-    {
-        int ret = system(LIBEXECDIR "/ibus-setup-unikey &");
-        if (ret == -1)
-            return;
-    } // END Run setup
-
     UnikeySetInputMethod(g_data.im);
     UnikeySetOutputCharset(g_data.oc);
     UnikeySetOptions(&g_data.ukopt);
@@ -435,22 +427,6 @@ void ibus_unikey_engine_create_property_list()
     if (ibus_prop_list_update_property(g_data.menu_opt, prop) == false)
         ibus_prop_list_append(g_data.menu_opt, prop);
 
-    // --create and add Launch Setup GUI property
-    label = ibus_text_new_from_static_string(_("Full setup..."));
-    tooltip = ibus_text_new_from_static_string(_("Full setup utility for IBus-Unikey"));
-    prop = ibus_property_new("RunSetupGUI",
-                             PROP_TYPE_NORMAL,
-                             label,
-                             "",
-                             tooltip,
-                             TRUE,
-                             TRUE,
-                             PROP_STATE_UNCHECKED,
-                             NULL);
-
-    if (ibus_prop_list_update_property(g_data.menu_opt, prop) == false)
-        ibus_prop_list_append(g_data.menu_opt, prop);
-// END create option menu
 
 // create top menu
     // add item
