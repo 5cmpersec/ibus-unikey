@@ -7,6 +7,7 @@
 #include "base/port.h"
 #include "unix/ibus/engine_interface.h"
 
+class IPropertyHandler;
 
 class UnikeyEngine : public IEngine {
 public:
@@ -54,6 +55,8 @@ public:
     // The callback function to the "disconnected" signal to the bus object.
     static void Disconnected(IBusBus *bus, gpointer user_data);
 
+private:
+    std::unique_ptr<IPropertyHandler> property_handler_;
 
     DISALLOW_COPY_AND_ASSIGN(UnikeyEngine);
 };

@@ -14,6 +14,8 @@
 #include "unix/ibus/engine_registrar.h"
 #include "unix/ibus/engine_private.h"
 
+#include "unix/ibus/property_handler.h"
+
 
 namespace {
 
@@ -78,7 +80,8 @@ void UnikeyEngineInstanceInit(GTypeInstance *instance, gpointer klass) {
 }  // namespace
 
 
-UnikeyEngine::UnikeyEngine() {
+UnikeyEngine::UnikeyEngine() 
+    : property_handler_(new PropertyHandler()) {
 }
 
 UnikeyEngine::~UnikeyEngine() {
@@ -127,6 +130,7 @@ void UnikeyEngine::Enable(IBusEngine *engine) {
 
 void UnikeyEngine::FocusIn(IBusEngine *engine) {
     BLOG_DEBUG("FocusIn");
+    property_handler_->Register(engine);
 
     ibus_unikey_engine_focus_in(engine);
 
@@ -135,6 +139,7 @@ void UnikeyEngine::FocusIn(IBusEngine *engine) {
 
 void UnikeyEngine::FocusOut(IBusEngine *engine) {
     BLOG_DEBUG("FocusOut");
+    property_handler_->ResetContentType(engine);
 
     ibus_unikey_engine_focus_out(engine);
 
@@ -168,7 +173,8 @@ void UnikeyEngine::PropertyActivate(IBusEngine *engine,
                                   guint property_state) {
     BLOG_DEBUG("PropertyActivate: name={}, state={}", property_name, property_state);
 
-    ibus_unikey_engine_property_activate(engine, property_name, property_state);
+    property_handler_->ProcessPropertyActivate(engine, property_name, property_state);
+    // ibus_unikey_engine_property_activate(engine, property_name, property_state);
 }
 
 void UnikeyEngine::PropertyHide(IBusEngine *engine,

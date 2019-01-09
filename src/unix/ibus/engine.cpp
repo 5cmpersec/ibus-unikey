@@ -57,7 +57,7 @@ void ibus_unikey_engine_init()
     ibus_unikey_engine_load_config();
 
     g_data.preeditstr = new std::string();
-    ibus_unikey_engine_create_property_list();
+    // ibus_unikey_engine_create_property_list();
 }
 
 void ibus_unikey_engine_load_config()
@@ -132,7 +132,7 @@ void ibus_unikey_engine_destroy()
 {
     BLOG_DEBUG("ibus_unikey_engine_destroy");
     delete g_data.preeditstr;
-    g_object_unref(g_data.prop_list);
+    // g_object_unref(g_data.prop_list);
 }
 
 
@@ -144,7 +144,7 @@ void ibus_unikey_engine_focus_in(IBusEngine* engine)
     UnikeySetOutputCharset(g_data.oc);
 
     UnikeySetOptions(&g_data.ukopt);
-    ibus_engine_register_properties(engine, g_data.prop_list);
+    // ibus_engine_register_properties(engine, g_data.prop_list);
 }
 
 void ibus_unikey_engine_focus_out(IBusEngine* engine)
