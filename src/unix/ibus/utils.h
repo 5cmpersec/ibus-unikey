@@ -1,6 +1,12 @@
-#ifndef __UNIKEY_UTILS_H__
-#define __UNIKEY_UTILS_H__
+#pragma once
 
-int latinToUtf(unsigned char* dst, unsigned char* src, int inSize, int* pOutSize);
+#include <string>
+#include <glib.h>
 
-#endif // __UNIKEY_UTILS_H__
+namespace utils {
+
+int LatinToUtf(unsigned char* dst, unsigned char* src, int inSize, int* pOutSize);
+
+void EraseCharsUtf8(std::string& utf8, unsigned int num_chars);
+
+} // namespace utils

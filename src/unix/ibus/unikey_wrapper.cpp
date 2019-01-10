@@ -86,28 +86,6 @@ void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *s
     ibus_engine_update_preedit_text_with_mode(engine, text, ibus_text_get_length(text), visible, IBUS_ENGINE_PREEDIT_COMMIT);
 }
 
-void ibus_unikey_engine_erase_chars(int num_chars)
-{
-    BLOG_DEBUG("ibus_unikey_engine_erase_chars");
-    int i, k;
-    guchar c;
-
-    k = num_chars;
-
-    for ( i = g_data.preeditstr.length()-1; i >= 0 && k > 0; i--)
-    {
-        c = g_data.preeditstr.at(i);
-
-        // count down if byte is begin byte of utf-8 char
-        if (c < (guchar)'\x80' || c >= (guchar)'\xC0')
-        {
-            k--;
-        }
-    }
-
-    g_data.preeditstr.erase(i+1);
-}
-
 gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
                                                      guint keyval,
                                                      guint keycode,
@@ -189,7 +167,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
             }
             else
             {
-                ibus_unikey_engine_erase_chars(UnikeyBackspaces);
+                utils::EraseCharsUtf8(g_data.preeditstr, UnikeyBackspaces);
                 ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr.c_str(), true);
             }
 
@@ -205,7 +183,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                     static unsigned char buf[CONVERT_BUF_SIZE];
                     int bufSize = CONVERT_BUF_SIZE;
 
-                    latinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
+                    utils::LatinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
                     g_data.preeditstr.append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
                 }
 
@@ -265,7 +243,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
             }
             else
             {
-                ibus_unikey_engine_erase_chars(UnikeyBackspaces);
+                utils::EraseCharsUtf8(g_data.preeditstr, UnikeyBackspaces);
             }
         }
 
@@ -280,7 +258,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                 static unsigned char buf[CONVERT_BUF_SIZE];
                 int bufSize = CONVERT_BUF_SIZE;
 
-                latinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
+                utils::LatinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
                 g_data.preeditstr.append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
             }
         }

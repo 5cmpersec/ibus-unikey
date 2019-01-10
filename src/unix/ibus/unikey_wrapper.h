@@ -1,5 +1,4 @@
-#ifndef __ENGINE_PRIVATE_H__
-#define __ENGINE_PRIVATE_H__
+#pragma once
 
 #include <string>
 #include <ibus.h>
@@ -46,6 +45,3 @@ void ibus_unikey_engine_erase_chars(int num_chars);
 void ibus_unikey_engine_clean_buffer(IBusEngine* engine);
 
 void ibus_unikey_engine_commit(IBusEngine* engine);
-
-#endif // __ENGINE_PRIVATE_H__
-

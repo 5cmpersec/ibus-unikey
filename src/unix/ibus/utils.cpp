@@ -1,12 +1,10 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "unix/ibus/utils.h"
 
 
+namespace utils {
+
 // code from x-unikey, for convert charset that not is XUtf-8
-int latinToUtf(unsigned char* dst, unsigned char* src, int inSize, int* pOutSize)
+int LatinToUtf(unsigned char* dst, unsigned char* src, int inSize, int* pOutSize)
 {
     int i;
     int outLeft;
@@ -37,3 +35,29 @@ int latinToUtf(unsigned char* dst, unsigned char* src, int inSize, int* pOutSize
     *pOutSize = outLeft;
     return (outLeft >= 0);
 }
+
+void EraseCharsUtf8(std::string& utf8, unsigned int num_chars)
+{
+    if(utf8.empty())
+    {
+        return;
+    }
+
+    int i = 0;
+    guchar c;
+
+    for (i = utf8.length()-1; i >= 0 && num_chars > 0; i--)
+    {
+        c = utf8.at(i);
+
+        // count down if byte is begin byte of utf-8 char
+        if (c < (guchar)'\x80' || c >= (guchar)'\xC0')
+        {
+            num_chars--;
+        }
+    }
+
+    utf8.erase(i+1);
+}
+
+} // namespace utils
