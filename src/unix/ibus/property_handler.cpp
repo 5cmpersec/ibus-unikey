@@ -2,9 +2,11 @@
 
 #include <string>
 
+#include "base/singleton.h"
 #include "base/logging.h"
 
 #include "unix/ibus/unikey_engine_property.h"
+#include "unix/ibus/unikey_wrapper.h"
 
 
 namespace {
@@ -201,7 +203,7 @@ void PropertyHandler::AppendOutputCharsetPropertyToPanel() {
 
         if (entry.output_charset == initial_charset) {
             state = PROP_STATE_CHECKED;
-            charset_symbol = entry.label;
+            charset_symbol = entry.label_for_panel;
         }
 
         IBusProperty *item = ibus_property_new(entry.key,
@@ -400,6 +402,7 @@ void PropertyHandler::UpdateInputMethodIcon(IBusEngine* engine,
 void PropertyHandler::SetInputMethod(IBusEngine *engine, 
                                      const InputMethod new_input_method) {
     BLOG_DEBUG("SetInputMethod");
+    Singleton<UnikeyWrapper>::get()->SetInputMethod(new_input_method);
     original_input_method_ = new_input_method;
 }
 
@@ -434,7 +437,7 @@ void PropertyHandler::UpdateOutputCharsetIcon(IBusEngine* engine,
         // No need to call unref since ibus_prop_list_get does not add ref.
     }
 
-    const char *charset_symbol = entry->label;
+    const char *charset_symbol = entry->label_for_panel;
 // Update the text icon for Gnome shell.
 #ifdef UNIKEY_IBUS_HAS_SYMBOL
     IBusText *symbol = ibus_text_new_from_static_string(charset_symbol);
@@ -452,6 +455,6 @@ void PropertyHandler::UpdateOutputCharsetIcon(IBusEngine* engine,
 void PropertyHandler::SetOutputCharset(IBusEngine *engine, 
                                        const OutputCharset new_charset) {
     BLOG_DEBUG("SetOutputCharset");
+    Singleton<UnikeyWrapper>::get()->SetOutputCharset(new_charset);
     original_output_charset_ = new_charset;
-
 }

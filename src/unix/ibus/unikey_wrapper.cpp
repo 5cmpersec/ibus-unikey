@@ -14,16 +14,19 @@
 
 #define _(string) gettext(string)
 
-#define CONVERT_BUF_SIZE 1024
+namespace {
 
-static unsigned char WordBreakSyms[] =
-{
-    ',', ';', ':', '.', '\"', '\'', '!', '?', ' ',
-    '<', '>', '=', '+', '-', '*', '/', '\\',
-    '_', '~', '`', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']',
-    '|'
-};
+const int kBufferSize = 1024;
 
+unsigned char kWordBreakSyms[] =
+    {
+        ',', ';', ':', '.', '\"', '\'', '!', '?', ' ',
+        '<', '>', '=', '+', '-', '*', '/', '\\',
+        '_', '~', '`', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']',
+        '|'
+    };
+
+} // namespace
 
 void UnikeyWrapper::SetUp() {
     BLOG_DEBUG("UnikeyWrapper::SetUp");
@@ -48,6 +51,60 @@ void UnikeyWrapper::CleanUp() {
 void UnikeyWrapper::Reset(IBusEngine* engine) {
     BLOG_DEBUG("UnikeyWrapper::Reset");
     CleanBuffer(engine);
+}
+
+void UnikeyWrapper::SetInputMethod(InputMethod new_method) {
+    BLOG_DEBUG("UnikeyWrapper::SetInputMethod: {}", (int)new_method);
+    switch(new_method) {
+        case InputMethod::TELEX:
+            input_method_ = UkTelex;
+            break;
+        case InputMethod::VNI:
+            input_method_ = UkVni;
+            break;
+        case InputMethod::STELEX:
+            input_method_ = UkSimpleTelex;
+            break;
+        case InputMethod::STELEX2:
+            input_method_ = UkSimpleTelex2;
+            break;
+        default:
+            break;
+    }
+    UnikeySetInputMethod(input_method_);
+}
+
+void UnikeyWrapper::SetOutputCharset(OutputCharset new_charset) {
+    BLOG_DEBUG("UnikeyWrapper::SetOutputCharset: {}", (int)new_charset);
+    switch(new_charset) {
+        case OutputCharset::UNICODE:
+            output_charset_ = CONV_CHARSET_XUTF8;
+            break;
+        case OutputCharset::TCVN3:
+            output_charset_ = CONV_CHARSET_TCVN3;
+            break;
+        case OutputCharset::VNI_WIN:
+            output_charset_ = CONV_CHARSET_VNIWIN;
+            break;
+        case OutputCharset::VIQR:
+            output_charset_ = CONV_CHARSET_VIQR;
+            break;
+        case OutputCharset::BK_HCM2:
+            output_charset_ = CONV_CHARSET_BKHCM2;
+            break;
+        case OutputCharset::CSTRING:
+            output_charset_ = CONV_CHARSET_UNI_CSTRING;
+            break;
+        case OutputCharset::NCR_DECIMAL:
+            output_charset_ = CONV_CHARSET_UNIREF;
+            break;
+        case OutputCharset::NCR_HEX:
+            output_charset_ = CONV_CHARSET_UNIREF_HEX;
+            break;
+        default:
+            break;
+    }
+    UnikeySetOutputCharset(output_charset_);
 }
 
 void UnikeyWrapper::CleanBuffer(IBusEngine* engine) {
@@ -184,11 +241,11 @@ gboolean UnikeyWrapper::ProcessKeyEventPreedit(IBusEngine* engine,
                 }
                 else
                 {
-                    static unsigned char buf[CONVERT_BUF_SIZE];
-                    int bufSize = CONVERT_BUF_SIZE;
+                    static unsigned char buf[kBufferSize];
+                    int bufSize = kBufferSize;
 
                     utils::LatinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
-                    buffer_.append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
+                    buffer_.append((const gchar*)buf, kBufferSize - bufSize);
                 }
 
                 UpdatePreedit(engine, buffer_.c_str(), true);
@@ -259,11 +316,11 @@ gboolean UnikeyWrapper::ProcessKeyEventPreedit(IBusEngine* engine,
             }
             else
             {
-                static unsigned char buf[CONVERT_BUF_SIZE];
-                int bufSize = CONVERT_BUF_SIZE;
+                static unsigned char buf[kBufferSize];
+                int bufSize = kBufferSize;
 
                 utils::LatinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
-                buffer_.append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
+                buffer_.append((const gchar*)buf, kBufferSize - bufSize);
             }
         }
         else if (keyval != IBUS_Shift_L && keyval != IBUS_Shift_R) // if ukengine not process
@@ -280,10 +337,10 @@ gboolean UnikeyWrapper::ProcessKeyEventPreedit(IBusEngine* engine,
         if (buffer_.length() > 0)
         {
             static guint i;
-            for (i = 0; i < sizeof(WordBreakSyms); i++)
+            for (i = 0; i < sizeof(kWordBreakSyms); i++)
             {
-                if (WordBreakSyms[i] == buffer_.at(buffer_.length()-1)
-                    && WordBreakSyms[i] == keyval)
+                if (kWordBreakSyms[i] == buffer_.at(buffer_.length()-1)
+                    && kWordBreakSyms[i] == keyval)
                 {
                     CommitPreedit(engine);
                     return true;

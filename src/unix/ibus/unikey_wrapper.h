@@ -4,6 +4,9 @@
 #include <ibus.h>
 
 #include "base/port.h"
+#include "unix/ibus/input_method.h"
+#include "unix/ibus/output_charset.h"
+
 #include "third_party/libunikey/unikey.h"
 #include "third_party/libunikey/vnconv.h"
 
@@ -22,6 +25,9 @@ public:
                              guint keyval,
                              guint keycode,
                              guint modifiers);
+
+    void SetInputMethod(InputMethod new_method);
+    void SetOutputCharset(OutputCharset new_charset);
 private:
     void CleanBuffer(IBusEngine* engine);
     void UpdatePreedit(IBusEngine* engine,
