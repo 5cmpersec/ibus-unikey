@@ -1,94 +1,78 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <cstdlib>
+#include <cstddef>
 #include <cstdio>
 
-#include <libintl.h>
-#include <locale.h>
+#include "base/const.h"
+#include "base/logging.h"
+#include "base/version.h"
 
-#include <ibus.h>
-#include "utils.h"
-#include "engine.h"
-#include "unikey.h"
+#include "unix/ibus/unikey_engine.h"
 
-static IBusBus* bus         = NULL;
-static IBusFactory* factory = NULL;
+namespace {
 
-/* option */
-static gboolean xml     = FALSE;
-static gboolean ibus    = FALSE;
-static gboolean verbose = FALSE;
-static gboolean version = FALSE;
+IBusBus *g_bus = nullptr;
 
-static const GOptionEntry entries[] =
-{
-    { "xml",     'x', 0, G_OPTION_ARG_NONE, &xml,     "generate xml for engines", NULL },
-    { "ibus",    'i', 0, G_OPTION_ARG_NONE, &ibus,    "component is executed by ibus", NULL },
-    { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "verbose", NULL },
-    { "version", 'V', 0, G_OPTION_ARG_NONE, &version, "print ibus-unikey version", NULL },
-    { NULL },
-};
+// Creates a IBusComponent object and add engine(s) to the object.
+IBusComponent *GetIBusComponent() {
+    IBusComponent *component = ibus_component_new(
+        kComponentName,
+        kComponentDescription,
+        Version::GetUnikeyVersion().c_str(),
+        kComponentLicense,
+        kComponentAuthor,
+        kComponentHomepage,
+        "",
+        kComponentTextdomain);
 
-static void ibus_disconnected_cb(IBusBus* bus, gpointer user_data)
-{
-    ibus_quit();
+    for (size_t i = 0; i < kEngineArrayLen; ++i) {
+        ibus_component_add_engine(component,
+                                  ibus_engine_desc_new(kEngineNameArray[i],
+                                                       kEngineLongnameArray[i],
+                                                       kEngineDescription,
+                                                       kEngineLanguage,
+                                                       kComponentLicense,
+                                                       kComponentAuthor,
+                                                       kEngineIcon,
+                                                       kEngineLayoutArray[i]));
+    }
+    return component;
 }
 
-static void start_component(void)
-{
-    GList* engines;
-    GList* p;
-    IBusComponent* component;
+// Initializes ibus components and adds Unikey engine.
+void InitIBusComponent(bool executed_by_ibus_daemon) {
+    BLOG_DEBUG("InitIBusComponent started: {}", executed_by_ibus_daemon);
+    g_bus = ibus_bus_new();
+    BLOG_DEBUG("ibus_bus_new: ");
+    g_signal_connect(g_bus,
+                     "disconnected",
+                     G_CALLBACK(UnikeyEngine::Disconnected),
+                     nullptr);
 
-    ibus_init();
-
-    bus = ibus_bus_new();
-    g_signal_connect(bus, "disconnected", G_CALLBACK(ibus_disconnected_cb), NULL);
-
-    component = ibus_unikey_get_component();
-
-    factory = ibus_factory_new(ibus_bus_get_connection(bus));
-
-    engines = ibus_component_get_engines(component);
-    for (p = engines; p != NULL; p = p->next)
-    {
-        IBusEngineDesc* engine = (IBusEngineDesc*)p->data;
-        ibus_factory_add_engine(factory, ibus_engine_desc_get_name(engine), IBUS_TYPE_UNIKEY_ENGINE);
+    IBusComponent *component = GetIBusComponent();
+    IBusFactory *factory = ibus_factory_new(ibus_bus_get_connection(g_bus));
+    GList *engines = ibus_component_get_engines(component);
+    for (GList *p = engines; p; p = p->next) {
+        IBusEngineDesc *engine = reinterpret_cast<IBusEngineDesc*>(p->data);
+        const gchar * const engine_name = ibus_engine_desc_get_name(engine);
+        BLOG_DEBUG("engine_name: {}", engine_name);
+        ibus_factory_add_engine(
+            factory, engine_name, UnikeyEngine::GetType());
     }
 
-    if (ibus)
-        ibus_bus_request_name(bus, "org.freedesktop.IBus.Unikey", 0);
-    else
-        ibus_bus_register_component(bus, component);
-
+    if (executed_by_ibus_daemon) {
+        ibus_bus_request_name(g_bus, kComponentName, 0);
+    } else {
+        ibus_bus_register_component(g_bus, component);
+    }
     g_object_unref(component);
-
-    ibus_unikey_init(bus);
-    ibus_main();
-    ibus_unikey_exit();
+    BLOG_DEBUG("InitIBusComponent ended");
 }
 
-int main(gint argc, gchar** argv)
-{
-    GError* error = NULL;
-    GOptionContext* context;
+}  // namespace
 
-    setlocale(LC_ALL, "");
-    bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
-    textdomain(GETTEXT_PACKAGE);
-
-    context = g_option_context_new("- ibus unikey engine component");
-
-    g_option_context_add_main_entries(context, entries, "ibus-unikey");
-
-    if (!g_option_context_parse(context, &argc, &argv, &error)) {
-        g_print("Option parsing failed: %s\n", error->message);
-        exit(-1);
-    }
-
-    start_component();
-
+int main(gint argc, gchar **argv) {
+    BLOG_DEBUG("main started");
+    ibus_init();
+    InitIBusComponent(true);
+    ibus_main();
     return 0;
 }

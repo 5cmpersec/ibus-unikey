@@ -50,8 +50,6 @@ SET(PKGDATADIR          "${CMAKE_INSTALL_FULL_DATADIR}/${PACKAGE_NAME}")
 SET(UI_DATA_DIR         "${PKGDATADIR}/ui")
 SET(IBUS_COMPONENT_DIR  "${CMAKE_INSTALL_FULL_DATADIR}/ibus/component")
 
-SET(GSETTINGS_SCHEMA_DIR  "${PROJECT_SOURCE_DIR}/src/data/gschema")
-
 CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/src/unix/ibus/unikey.xml.in"
   "${CMAKE_CURRENT_BINARY_DIR}/unikey.xml"
@@ -63,16 +61,9 @@ MESSAGE(STATUS "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 
 FILE(GLOB IBUS_UNIKEY_ENGINE_SRC
   "src/unix/ibus/*.cpp"
+  "src/base/*.cpp"
 )
 
-FILE(GLOB IBUS_UNIKEY_SETUP_SRC
-  "src/gui/setup_dialog/*.cpp"
-  "src/unix/ibus/utils.cpp"
-)
-
-FILE(GLOB UI_SETUP_FILES
-  "src/gui/setup_dialog/*.ui"
-)
 
 FILE(GLOB IBUS_COMPONENT_FILES
   "${CMAKE_CURRENT_BINARY_DIR}/unikey.xml"
@@ -112,42 +103,11 @@ TARGET_COMPILE_DEFINITIONS(ibus-engine-unikey
   PUBLIC PKGDATADIR=\"${PKGDATADIR}\"
 )
 
-INCLUDE(GSettings)
-add_schemas(ibus-engine-unikey ${GSETTINGS_SCHEMA_DIR} ${CMAKE_INSTALL_PREFIX})
-
-# ------ ibus-setup-unikey --------#
-ADD_EXECUTABLE(ibus-setup-unikey ${IBUS_UNIKEY_SETUP_SRC})
-
-TARGET_LINK_LIBRARIES(ibus-setup-unikey
-  libunikey
-  ${IBUS_LIBRARIES}
-  ${GTK2_LIBRARIES}
-  Threads::Threads
-)
-
-TARGET_COMPILE_OPTIONS(ibus-setup-unikey
-  PUBLIC -Wno-variadic-macros
-)
-
-TARGET_COMPILE_DEFINITIONS(ibus-setup-unikey
-  PUBLIC LIBEXECDIR=\"${LIBEXECDIR}\"
-  PUBLIC PKGDATADIR=\"${PKGDATADIR}\"
-  PUBLIC UI_DATA_DIR=\"${UI_DATA_DIR}\"
-  PUBLIC LOCALEDIR=\"${LOCALEDIR}\"
-  PUBLIC GETTEXT_PACKAGE=\"${PACKAGE_NAME}\"
-  PUBLIC PACKAGE_STRING=\"${PACKAGE_STRING}\"
-  PUBLIC PACKAGE_VERSION=\"${PACKAGE_VERSION}\"
-  PUBLIC PACKAGE_BUGREPORT=\"${PACKAGE_BUGREPORT}\"
-  PUBLIC PACKAGE_NAME=\"${PACKAGE_NAME}\"
-)
 
 # ----- install -------#
 
-INSTALL(TARGETS ibus-engine-unikey ibus-setup-unikey
+INSTALL(TARGETS ibus-engine-unikey
   DESTINATION ${LIBEXECDIR})
-
-INSTALL(FILES ${UI_SETUP_FILES}
-  DESTINATION ${UI_DATA_DIR})
 
 INSTALL(FILES ${IBUS_COMPONENT_FILES}
   DESTINATION ${IBUS_COMPONENT_DIR})

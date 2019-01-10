@@ -18,7 +18,7 @@
 
 #include "base/port.h"
 
-namespace Unikey {
+namespace unikey {
 
 class Logger {
 private:
@@ -65,19 +65,19 @@ private:
     DISALLOW_COPY_AND_ASSIGN(Logger);
 };
 
-} // namespace Unikey
+} // namespace unikey
 
 #ifndef NDEBUG
-#define BLOG_TRACE(...) SPDLOG_TRACE(Unikey::Logger::get_default_logger(), __VA_ARGS__)
-#define BLOG_DEBUG(...) Unikey::Logger::get_default_logger()->debug(__VA_ARGS__)
+#define BLOG_TRACE(...) SPDLOG_TRACE(unikey::Logger::get_default_logger(), __VA_ARGS__)
+#define BLOG_DEBUG(...) unikey::Logger::get_default_logger()->debug(__VA_ARGS__)
 #else
 #define BLOG_TRACE(...)
 #define BLOG_DEBUG(...)
 #endif // NDEBUG
 
-#define BLOG_INFO(...) Unikey::Logger::get_default_logger()->info(__VA_ARGS__)
-#define BLOG_WARNING(...) Unikey::Logger::get_default_logger()->warn(__VA_ARGS__)
-#define BLOG_ERROR(...) Unikey::Logger::get_default_logger()->error(__VA_ARGS__)
-#define BLOG_CRITICAL(...) Unikey::Logger::get_default_logger()->critical(__VA_ARGS__)
+#define BLOG_INFO(...) unikey::Logger::get_default_logger()->info(__VA_ARGS__)
+#define BLOG_WARNING(...) unikey::Logger::get_default_logger()->warn(__VA_ARGS__)
+#define BLOG_ERROR(...) unikey::Logger::get_default_logger()->error(__VA_ARGS__)
+#define BLOG_CRITICAL(...) unikey::Logger::get_default_logger()->critical(__VA_ARGS__)
 
-#define BLOG_SET_OUTPUT_FILE(file) Unikey::Logger::set_default_logger(file, file)
+#define BLOG_SET_OUTPUT_FILE(file) unikey::Logger::set_default_logger(file, file)
