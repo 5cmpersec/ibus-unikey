@@ -3,45 +3,43 @@
 #include <string>
 #include <ibus.h>
 
+#include "base/port.h"
 #include "third_party/libunikey/unikey.h"
 #include "third_party/libunikey/vnconv.h"
 
 
-typedef struct _IBusUnikeyData         IBusUnikeyData;
+class UnikeyWrapper {
 
-// libunikey internal data
-struct _IBusUnikeyData
-{
-    UkInputMethod im; // input method
-    unsigned int  oc; // output charset
-    UnikeyOptions ukopt;
-    gboolean process_w_at_begin;
+public:
+    UnikeyWrapper() {}
+    virtual ~UnikeyWrapper() {}
 
-    gboolean last_key_with_shift;
+    void SetUp();
+    void CleanUp();
+    void Reset(IBusEngine* engine);
 
-    std::string preeditstr;
+    gboolean ProcessKeyEvent(IBusEngine* engine,
+                             guint keyval,
+                             guint keycode,
+                             guint modifiers);
+private:
+    void CleanBuffer(IBusEngine* engine);
+    void UpdatePreedit(IBusEngine* engine,
+                       const gchar *string,
+                       gboolean visible);
+    void CommitPreedit(IBusEngine* engine);
+    gboolean ProcessKeyEventPreedit(IBusEngine* engine,
+                                    guint keyval,
+                                    guint keycode,
+                                    guint modifiers);
+
+private:
+    std::string buffer_;
+    UkInputMethod input_method_;
+    unsigned int output_charset_;
+    UnikeyOptions options_;
+    gboolean process_w_at_begin_;
+    gboolean last_key_with_shift_;
+
+    DISALLOW_COPY_AND_ASSIGN(UnikeyWrapper);
 };
-
-void ibus_unikey_init();
-void ibus_unikey_exit();
-
-gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
-                                                     guint keyval,
-                                                     guint keycode,
-                                                     guint modifiers);
-
-void ibus_unikey_engine_focus_in(IBusEngine* engine);
-void ibus_unikey_engine_focus_out(IBusEngine* engine);
-void ibus_unikey_engine_reset(IBusEngine* engine);
-
-gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
-                                                             guint keyval,
-                                                             guint keycode,
-                                                             guint modifiers);
-
-void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible);
-void ibus_unikey_engine_erase_chars(int num_chars);
-
-void ibus_unikey_engine_clean_buffer(IBusEngine* engine);
-
-void ibus_unikey_engine_commit(IBusEngine* engine);

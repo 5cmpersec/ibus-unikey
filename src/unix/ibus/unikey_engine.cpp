@@ -36,7 +36,7 @@ GObject *UnikeyEngineClassConstructor(
     GObjectConstructParam *construct_properties) {
     BLOG_DEBUG("UnikeyEngineClassConstructor");
 
-    ibus_unikey_init();
+    Singleton<UnikeyWrapper>::get()->SetUp();
 
 
     return G_OBJECT_CLASS(g_parent_class)->constructor(type,
@@ -48,7 +48,7 @@ void UnikeyEngineClassDestroy(IBusObject *engine) {
     BLOG_DEBUG("UnikeyEngineClassDestroy");
     IBUS_OBJECT_CLASS(g_parent_class)->destroy(engine);
 
-    ibus_unikey_exit();
+    Singleton<UnikeyWrapper>::get()->CleanUp();
 }
 
 void UnikeyEngineClassInit(gpointer klass, gpointer class_data) {
@@ -126,7 +126,7 @@ void UnikeyEngine::FocusIn(IBusEngine *engine) {
     BLOG_DEBUG("FocusIn");
     property_handler_->Register(engine);
 
-    ibus_unikey_engine_focus_in(engine);
+    // ibus_unikey_engine_focus_in(engine);
 
     g_parent_class->focus_in(engine);
 }
@@ -135,7 +135,7 @@ void UnikeyEngine::FocusOut(IBusEngine *engine) {
     BLOG_DEBUG("FocusOut");
     property_handler_->ResetContentType(engine);
 
-    ibus_unikey_engine_focus_out(engine);
+    Singleton<UnikeyWrapper>::get()->Reset(engine);
 
     g_parent_class->focus_out(engine);
 }
@@ -159,7 +159,7 @@ gboolean UnikeyEngine::ProcessKeyEvent(
     guint modifiers) {
     BLOG_DEBUG("keyval: {}, keycode: {}, modifiers:  {}", keyval, keycode, modifiers);
 
-    return ibus_unikey_engine_process_key_event(engine, keyval, keycode, modifiers);
+    return Singleton<UnikeyWrapper>::get()->ProcessKeyEvent(engine, keyval, keycode, modifiers);
 }
 
 void UnikeyEngine::PropertyActivate(IBusEngine *engine,
@@ -183,7 +183,7 @@ void UnikeyEngine::PropertyShow(IBusEngine *engine,
 void UnikeyEngine::Reset(IBusEngine *engine) {
     BLOG_DEBUG("Reset");
 
-    ibus_unikey_engine_reset(engine);
+    Singleton<UnikeyWrapper>::get()->Reset(engine);
 }
 
 void UnikeyEngine::SetCapabilities(IBusEngine *engine,
