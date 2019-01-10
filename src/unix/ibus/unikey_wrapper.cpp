@@ -2,7 +2,7 @@
 #include "config.h"
 #endif
 
-#include "engine_private.h"
+#include "unikey_wrapper.h"
 
 #include <libintl.h>
 #include <ibus.h>

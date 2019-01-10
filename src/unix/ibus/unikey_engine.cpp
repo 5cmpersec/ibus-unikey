@@ -12,7 +12,7 @@
 #include "base/logging.h"
 
 #include "unix/ibus/engine_registrar.h"
-#include "unix/ibus/engine_private.h"
+#include "unix/ibus/unikey_wrapper.h"
 
 #include "unix/ibus/property_handler.h"
 
