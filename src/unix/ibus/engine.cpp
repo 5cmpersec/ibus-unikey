@@ -38,6 +38,18 @@ void ibus_unikey_init()
 {
     BLOG_DEBUG("ibus_unikey_init");
     UnikeySetup();
+
+    UnikeyOptions ukopt;
+    ukopt.spellCheckEnabled     = 1;
+    ukopt.autoNonVnRestore      = 1;
+    ukopt.modernStyle           = 0;
+    ukopt.freeMarking           = 1;
+    ukopt.macroEnabled          = 0;
+    UnikeySetOptions(&ukopt);
+
+    g_data.im = UkTelex;
+    g_data.oc = 12;
+
 }
 
 void ibus_unikey_exit()
