@@ -174,7 +174,6 @@ void UnikeyEngine::PropertyActivate(IBusEngine *engine,
     BLOG_DEBUG("PropertyActivate: name={}, state={}", property_name, property_state);
 
     property_handler_->ProcessPropertyActivate(engine, property_name, property_state);
-    // ibus_unikey_engine_property_activate(engine, property_name, property_state);
 }
 
 void UnikeyEngine::PropertyHide(IBusEngine *engine,

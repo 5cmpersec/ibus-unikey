@@ -46,20 +46,11 @@ void ibus_unikey_engine_focus_out(IBusEngine* engine);
 void ibus_unikey_engine_reset(IBusEngine* engine);
 void ibus_unikey_engine_enable(IBusEngine* engine);
 void ibus_unikey_engine_disable(IBusEngine* engine);
-void ibus_unikey_engine_load_config();
-void ibus_unikey_config_value_changed(GSettings *settings,
-                                             const gchar *key,
-                                             gpointer    user_data);
-void ibus_unikey_engine_property_activate(IBusEngine* engine,
-                                                 const gchar* prop_name,
-                                                 guint prop_state);
 
 gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                                                              guint keyval,
                                                              guint keycode,
                                                              guint modifiers);
-
-void ibus_unikey_engine_create_property_list();
 
 void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible);
 void ibus_unikey_engine_erase_chars(int num_chars);
