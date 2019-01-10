@@ -4,8 +4,9 @@
 #include <string>
 #include <ibus.h>
 
-#include "unikey.h"
-#include "vnconv.h"
+#include "third_party/libunikey/unikey.h"
+#include "third_party/libunikey/vnconv.h"
+
 
 typedef struct _IBusUnikeyData         IBusUnikeyData;
 

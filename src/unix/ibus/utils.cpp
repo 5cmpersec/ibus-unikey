@@ -2,7 +2,8 @@
 #include "config.h"
 #endif
 
-#include "utils.h"
+#include "unix/ibus/utils.h"
+
 
 // code from x-unikey, for convert charset that not is XUtf-8
 int latinToUtf(unsigned char* dst, unsigned char* src, int inSize, int* pOutSize)

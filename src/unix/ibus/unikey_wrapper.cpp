@@ -1,15 +1,12 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "unikey_wrapper.h"
 
 #include <libintl.h>
 #include <ibus.h>
 
-#include "utils.h"
-#include "unikey.h"
-#include "vnconv.h"
+#include "unix/ibus/utils.h"
+
+#include "third_party/libunikey/unikey.h"
+#include "third_party/libunikey/vnconv.h"
 
 #include "base/logging.h"
 
