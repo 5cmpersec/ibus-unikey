@@ -26,16 +26,12 @@ struct _IBusUnikeyData
 
     gboolean last_key_with_shift;
 
-    std::string* preeditstr;
+    std::string preeditstr;
 };
 
 void ibus_unikey_init();
 void ibus_unikey_exit();
 
-// prototype
-void ibus_unikey_engine_init();
-
-void ibus_unikey_engine_destroy();
 gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
                                                      guint keyval,
                                                      guint keycode,
@@ -44,8 +40,6 @@ gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
 void ibus_unikey_engine_focus_in(IBusEngine* engine);
 void ibus_unikey_engine_focus_out(IBusEngine* engine);
 void ibus_unikey_engine_reset(IBusEngine* engine);
-void ibus_unikey_engine_enable(IBusEngine* engine);
-void ibus_unikey_engine_disable(IBusEngine* engine);
 
 gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                                                              guint keyval,

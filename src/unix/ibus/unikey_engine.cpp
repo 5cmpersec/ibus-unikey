@@ -37,7 +37,6 @@ GObject *UnikeyEngineClassConstructor(
     BLOG_DEBUG("UnikeyEngineClassConstructor");
 
     ibus_unikey_init();
-    ibus_unikey_engine_init();
 
 
     return G_OBJECT_CLASS(g_parent_class)->constructor(type,
@@ -49,7 +48,6 @@ void UnikeyEngineClassDestroy(IBusObject *engine) {
     BLOG_DEBUG("UnikeyEngineClassDestroy");
     IBUS_OBJECT_CLASS(g_parent_class)->destroy(engine);
 
-    ibus_unikey_engine_destroy();
     ibus_unikey_exit();
 }
 
@@ -112,8 +110,6 @@ void UnikeyEngine::CursorUp(IBusEngine *engine) {
 void UnikeyEngine::Disable(IBusEngine *engine) {
     BLOG_DEBUG("Disable");
 
-    ibus_unikey_engine_disable(engine);
-
     g_parent_class->disable(engine);
 }
 
@@ -122,8 +118,6 @@ void UnikeyEngine::Enable(IBusEngine *engine) {
     // If engine wants to use surrounding text, we should call
     // ibus_engine_get_surrounding_text once when the engine enabled.
     //ibus_engine_get_surrounding_text(engine, nullptr, nullptr, nullptr);
-
-    ibus_unikey_engine_enable(engine);
 
     g_parent_class->enable(engine);
 }

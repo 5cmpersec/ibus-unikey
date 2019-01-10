@@ -47,21 +47,6 @@ void ibus_unikey_exit()
 }
 
 
-void ibus_unikey_engine_init()
-{
-    BLOG_DEBUG("ibus_unikey_engine_init");
-
-    g_data.preeditstr = new std::string();
-}
-
-
-void ibus_unikey_engine_destroy()
-{
-    BLOG_DEBUG("ibus_unikey_engine_destroy");
-    delete g_data.preeditstr;
-}
-
-
 void ibus_unikey_engine_focus_in(IBusEngine* engine)
 {
     BLOG_DEBUG("ibus_unikey_engine_focus_in");
@@ -83,17 +68,6 @@ void ibus_unikey_engine_reset(IBusEngine* engine)
     BLOG_DEBUG("ibus_unikey_engine_reset");
     ibus_unikey_engine_clean_buffer(engine);
 }
-
-void ibus_unikey_engine_enable(IBusEngine* engine)
-{
-    BLOG_DEBUG("ibus_unikey_engine_enable");
-}
-
-void ibus_unikey_engine_disable(IBusEngine* engine)
-{
-    BLOG_DEBUG("ibus_unikey_engine_disable");
-}
-
 
 void ibus_unikey_engine_update_preedit_string(IBusEngine *engine, const gchar *string, gboolean visible)
 {
@@ -117,9 +91,9 @@ void ibus_unikey_engine_erase_chars(int num_chars)
 
     k = num_chars;
 
-    for ( i = g_data.preeditstr->length()-1; i >= 0 && k > 0; i--)
+    for ( i = g_data.preeditstr.length()-1; i >= 0 && k > 0; i--)
     {
-        c = g_data.preeditstr->at(i);
+        c = g_data.preeditstr.at(i);
 
         // count down if byte is begin byte of utf-8 char
         if (c < (guchar)'\x80' || c >= (guchar)'\xC0')
@@ -128,7 +102,7 @@ void ibus_unikey_engine_erase_chars(int num_chars)
         }
     }
 
-    g_data.preeditstr->erase(i+1);
+    g_data.preeditstr.erase(i+1);
 }
 
 gboolean ibus_unikey_engine_process_key_event(IBusEngine* engine,
@@ -199,21 +173,21 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
     {
         UnikeyBackspacePress();
 
-        if (UnikeyBackspaces == 0 || g_data.preeditstr->empty())
+        if (UnikeyBackspaces == 0 || g_data.preeditstr.empty())
         {
             return false;
         }
         else
         {
-            if (g_data.preeditstr->length() <= (guint)UnikeyBackspaces)
+            if (g_data.preeditstr.length() <= (guint)UnikeyBackspaces)
             {
-                g_data.preeditstr->clear();
+                g_data.preeditstr.clear();
                 ibus_engine_hide_preedit_text(engine);
             }
             else
             {
                 ibus_unikey_engine_erase_chars(UnikeyBackspaces);
-                ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr->c_str(), true);
+                ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr.c_str(), true);
             }
 
             // change tone position after press backspace
@@ -221,7 +195,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
             {
                 if (g_data.oc == CONV_CHARSET_XUTF8)
                 {
-                    g_data.preeditstr->append((const gchar*)UnikeyBuf, UnikeyBufChars);
+                    g_data.preeditstr.append((const gchar*)UnikeyBuf, UnikeyBufChars);
                 }
                 else
                 {
@@ -229,10 +203,10 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                     int bufSize = CONVERT_BUF_SIZE;
 
                     latinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
-                    g_data.preeditstr->append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
+                    g_data.preeditstr.append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
                 }
 
-                ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr->c_str(), true);
+                ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr.c_str(), true);
             }
         }
         return true;
@@ -258,8 +232,8 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
             }
             else
             {
-                g_data.preeditstr->append(keyval==IBUS_w?"w":"W");
-                ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr->c_str(), true);
+                g_data.preeditstr.append(keyval==IBUS_w?"w":"W");
+                ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr.c_str(), true);
                 return true;
             }
         }
@@ -282,9 +256,9 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
         // process result of ukengine
         if (UnikeyBackspaces > 0)
         {
-            if (g_data.preeditstr->length() <= (guint)UnikeyBackspaces)
+            if (g_data.preeditstr.length() <= (guint)UnikeyBackspaces)
             {
-                g_data.preeditstr->clear();
+                g_data.preeditstr.clear();
             }
             else
             {
@@ -296,7 +270,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
         {
             if (g_data.oc == CONV_CHARSET_XUTF8)
             {
-                g_data.preeditstr->append((const gchar*)UnikeyBuf, UnikeyBufChars);
+                g_data.preeditstr.append((const gchar*)UnikeyBuf, UnikeyBufChars);
             }
             else
             {
@@ -304,7 +278,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
                 int bufSize = CONVERT_BUF_SIZE;
 
                 latinToUtf(buf, UnikeyBuf, UnikeyBufChars, &bufSize);
-                g_data.preeditstr->append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
+                g_data.preeditstr.append((const gchar*)buf, CONVERT_BUF_SIZE - bufSize);
             }
         }
         else if (keyval != IBUS_Shift_L && keyval != IBUS_Shift_R) // if ukengine not process
@@ -313,17 +287,17 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
             static char s[6];
 
             n = g_unichar_to_utf8(keyval, s); // convert ucs4 to utf8 char
-            g_data.preeditstr->append(s, n);
+            g_data.preeditstr.append(s, n);
         }
         // end process result of ukengine
 
         // commit string: if need
-        if (g_data.preeditstr->length() > 0)
+        if (g_data.preeditstr.length() > 0)
         {
             static guint i;
             for (i = 0; i < sizeof(WordBreakSyms); i++)
             {
-                if (WordBreakSyms[i] == g_data.preeditstr->at(g_data.preeditstr->length()-1)
+                if (WordBreakSyms[i] == g_data.preeditstr.at(g_data.preeditstr.length()-1)
                     && WordBreakSyms[i] == keyval)
                 {
                     ibus_unikey_engine_commit(engine);
@@ -333,7 +307,7 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
         }
         // end commit string
 
-        ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr->c_str(), true);
+        ibus_unikey_engine_update_preedit_string(engine, g_data.preeditstr.c_str(), true);
         return true;
     } //end capture printable char
 
@@ -345,18 +319,18 @@ gboolean ibus_unikey_engine_process_key_event_preedit(IBusEngine* engine,
 void ibus_unikey_engine_clean_buffer(IBusEngine* engine) {
     BLOG_DEBUG("ibus_unikey_engine_clean_buffer");
     UnikeyResetBuf();
-    g_data.preeditstr->clear();
+    g_data.preeditstr.clear();
     ibus_engine_hide_preedit_text(engine);    
 }
 
 void ibus_unikey_engine_commit(IBusEngine* engine) {
     BLOG_DEBUG("ibus_unikey_engine_commit");
 
-    if (g_data.preeditstr->length() > 0)
+    if (g_data.preeditstr.length() > 0)
     {
         IBusText *text;
 
-        text = ibus_text_new_from_static_string(g_data.preeditstr->c_str());
+        text = ibus_text_new_from_static_string(g_data.preeditstr.c_str());
         ibus_engine_commit_text(engine, text);        
     }
     
