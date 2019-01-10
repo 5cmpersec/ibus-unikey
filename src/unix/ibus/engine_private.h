@@ -4,8 +4,6 @@
 #include <string>
 #include <ibus.h>
 
-#include <gio/gio.h>
-
 #include "unikey.h"
 #include "vnconv.h"
 
@@ -14,11 +12,6 @@ typedef struct _IBusUnikeyData         IBusUnikeyData;
 // libunikey internal data
 struct _IBusUnikeyData
 {
-    IBusPropList* prop_list;
-    IBusPropList* menu_im;
-    IBusPropList* menu_oc;
-    IBusPropList* menu_opt;
-
     UkInputMethod im; // input method
     unsigned int  oc; // output charset
     UnikeyOptions ukopt;

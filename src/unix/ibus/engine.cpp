@@ -4,11 +4,6 @@
 
 #include "engine_private.h"
 
-#include <string.h>
-#include <cstdlib>
-
-#include <sys/wait.h>
-
 #include <libintl.h>
 #include <ibus.h>
 
