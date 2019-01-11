@@ -17,12 +17,6 @@ const char kGObjectDataKey[] = "ibus-unikey-aux-data";
 const gchar kIBusUnikeySchema[] = "org.freedesktop.ibus.engine.unikey";
 const gchar kInputMethodConfig[] = "input-method";
 const gchar kOutputCharsetConfig[] = "output-charset";
-const gchar kOptionSpellCheckConfig[] = "spell-check";
-const gchar kOptionRestoreNonVnConfig[] = "auto-restore-non-vn";
-const gchar kOptionModernStyleConfig[] = "modern-style";
-const gchar kOptionFreeMarkingConfig[] = "free-marking";
-const gchar kOptionMacroEnableConfig[] = "macro-enabled";
-const gchar kOptionStandaloneWConfig[] = "standalone-w-as-uw";
 
 
 bool GetDisabled(IBusEngine *engine) {
@@ -53,13 +47,13 @@ bool SetString(GSettings* settings,
                                 g_variant_new_string(value));
 }
 
-// bool GetBoolean(GVariant *value, bool *out_boolean) {
-//     if (g_variant_classify(value) != G_VARIANT_CLASS_BOOLEAN) {
-//         return false;
-//     }
-//     *out_boolean = (g_variant_get_boolean(value) != FALSE);
-//     return true;
-// }
+bool GetBoolean(GVariant *value, bool *out_boolean) {
+    if (g_variant_classify(value) != G_VARIANT_CLASS_BOOLEAN) {
+        return false;
+    }
+    *out_boolean = (g_variant_get_boolean(value) != FALSE);
+    return true;
+}
 
 void GSettingsChangedCallback(GSettings *settings,
                               const gchar *key,
@@ -554,24 +548,20 @@ void PropertyHandler::AppendOptionPropertyToPanel() {
         return;
     }
 
-    options_map_["test"] = true;
-    for (auto it : options_map_) {
-        BLOG_DEBUG("{}: {}", it.first, it.second);
-    }
-
     IBusPropList *sub_prop_list = ibus_prop_list_new();
 
     for (size_t i = 0; i < kOptionPropertiesSize; ++i) {
         const OptionProperty &entry = kOptionProperties[i];
-        bool enabled = false;
-        auto it = options_map_.find(entry.key);
-        if (it != options_map_.end()) {
-            enabled = options_map_[entry.key];
-        } else {
-            enabled = entry.default_enabled;
+
+        GVariant *option = g_settings_get_value(settings_,
+                                                entry.key_for_gsettings);
+        bool option_is_enabled = false;
+        if (!GetBoolean(option, &option_is_enabled)) {
+            BLOG_ERROR("Cannot get boolean configuration.");
+            return;
         }
 
-        IBusPropState state = enabled ? PROP_STATE_CHECKED: PROP_STATE_UNCHECKED;
+        IBusPropState state = option_is_enabled ? PROP_STATE_CHECKED: PROP_STATE_UNCHECKED;
         IBusText *label = ibus_text_new_from_string(entry.label);
         IBusProperty *item = ibus_property_new(entry.key,
                                                PROP_TYPE_TOGGLE,

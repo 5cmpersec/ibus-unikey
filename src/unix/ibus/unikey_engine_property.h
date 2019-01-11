@@ -36,8 +36,8 @@ extern const OutputCharset kInitialOutputCharset;
 
 struct OptionProperty {
     const char *key;    // IBus property key.
+    const char *key_for_gsettings;
     const char *label;  // text for the menu.
-    const bool default_enabled;
 };
 
 extern const OptionProperty *kOptionProperties;

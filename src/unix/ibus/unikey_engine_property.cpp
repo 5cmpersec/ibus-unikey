@@ -102,18 +102,18 @@ const OutputCharsetProperty kOutputCharsetPropertiesArray[] = {
 const OptionProperty kOptionPropertiesArray[] = {
     {
         "Option.SpellCheck",
+        "spell-check",
         "Spell Check",
-        true,
     },
     {
         "Option.FreeMarking",
+        "free-marking",
         "Free Marking",
-        false,
     },
     {
         "Option.ModernStyle",
+        "modern-style",
         "Modern Style",
-        true,
     },
 };
 
