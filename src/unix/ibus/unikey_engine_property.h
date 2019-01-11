@@ -9,6 +9,7 @@
 struct InputMethodProperty {
     InputMethod input_method;
     const char *key;  // IBus property key for the mode.
+    const char *key_for_gsettings;
     const char *label;  // text for the radio menu.
     const char *label_for_panel;  // text for the language panel.
     const char *icon;
@@ -23,6 +24,7 @@ extern const InputMethod kInitialInputMethod;
 struct OutputCharsetProperty {
     OutputCharset output_charset;
     const char *key;  // IBus property key.
+    const char *key_for_gsettings;
     const char *label;  // text for the menu.
     const char *label_for_panel;  // text for the language panel.
 };

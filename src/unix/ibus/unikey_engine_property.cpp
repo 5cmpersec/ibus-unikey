@@ -9,6 +9,7 @@ const InputMethodProperty kInputMethodPropertiesArray[] = {
     {
         InputMethod::TELEX,
         "InputMethod.Telex",
+        "telex",
         "Telex",
         "Telex",
         "telex.png",
@@ -16,6 +17,7 @@ const InputMethodProperty kInputMethodPropertiesArray[] = {
     {
         InputMethod::VNI,
         "InputMethod.Vni",
+        "vni",
         "VNI",
         "VNI",
         "vni.png",
@@ -23,6 +25,7 @@ const InputMethodProperty kInputMethodPropertiesArray[] = {
     {
         InputMethod::STELEX,
         "InputMethod.STelex",
+        "stelex",
         "Simple Telex",
         "STelex",
         "stelex.png",
@@ -30,6 +33,7 @@ const InputMethodProperty kInputMethodPropertiesArray[] = {
     {
         InputMethod::STELEX2,
         "InputMethod.STelex2",
+        "stelex2",
         "Simple Telex 2",
         "STelex2",
         "stelex2.png",
@@ -40,48 +44,56 @@ const OutputCharsetProperty kOutputCharsetPropertiesArray[] = {
     {
         OutputCharset::UNICODE,
         "OutputCharset.Unicode",
+        "unicode",
         "Unicode",
         "Unicode",
     },
     {
         OutputCharset::TCVN3,
         "OutputCharset.TCVN3",
+        "tcvn3",
         "TCVN3",
         "TCVN3",
     },
     {
         OutputCharset::VNI_WIN,
         "OutputCharset.VNI_WIN",
+        "vni-win",
         "VNI Win",
         "VNI Win",
     },
     {
         OutputCharset::VIQR,
         "OutputCharset.VIQR",
+        "viqr",
         "VIQR",
         "VIQR",
     },
     {
         OutputCharset::BK_HCM2,
         "OutputCharset.BK_HCM2",
+        "bk-hcm2",
         "BK HCM 2",
         "BK HCM 2",
     },
     {
         OutputCharset::CSTRING,
         "OutputCharset.CSTRING",
+        "cstr",
         "CString",
         "CString",
     },
     {
         OutputCharset::NCR_DECIMAL,
         "OutputCharset.NCR_DECIMAL",
+        "ncr-dec",
         "NCR Decimal",
         "NCR Decimal",
     },
     {
         OutputCharset::NCR_HEX,
         "OutputCharset.NCR_HEX",
+        "ncr-hex",
         "NCR Hex",
         "NCR Hex",
     },

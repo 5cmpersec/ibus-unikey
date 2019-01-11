@@ -52,4 +52,7 @@ private:
     std::unordered_map<std::string, bool> options_map_;
 
     bool is_disabled_;
+
+    GSettings *settings_;
+    gulong settings_observer_id_;
 };

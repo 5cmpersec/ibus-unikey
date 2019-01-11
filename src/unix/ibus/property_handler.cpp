@@ -1,6 +1,7 @@
 #include "unix/ibus/property_handler.h"
 
 #include <string>
+#include <gio/gio.h>
 
 #include "base/singleton.h"
 #include "base/logging.h"
@@ -13,6 +14,16 @@ namespace {
 
 // A key which associates an IBusProperty object with InputMethodProperty.
 const char kGObjectDataKey[] = "ibus-unikey-aux-data";
+const gchar kIBusUnikeySchema[] = "org.freedesktop.ibus.engine.unikey";
+const gchar kInputMethodConfig[] = "input-method";
+const gchar kOutputCharsetConfig[] = "output-charset";
+const gchar kOptionSpellCheckConfig[] = "spell-check";
+const gchar kOptionRestoreNonVnConfig[] = "auto-restore-non-vn";
+const gchar kOptionModernStyleConfig[] = "modern-style";
+const gchar kOptionFreeMarkingConfig[] = "free-marking";
+const gchar kOptionMacroEnableConfig[] = "macro-enabled";
+const gchar kOptionStandaloneWConfig[] = "standalone-w-as-uw";
+
 
 bool GetDisabled(IBusEngine *engine) {
     bool disabled = false;
@@ -26,6 +37,36 @@ bool GetDisabled(IBusEngine *engine) {
     return disabled;
 }
 
+bool GetString(GVariant *value, std::string *out_string) {
+    if (g_variant_classify(value) != G_VARIANT_CLASS_STRING) {
+        return false;
+    }
+    *out_string = static_cast<const char *>(g_variant_get_string(value, NULL));
+    return true;
+}
+
+bool SetString(GSettings* settings,
+               const gchar* name,
+               const gchar* value) {
+    return g_settings_set_value(settings,
+                                name,
+                                g_variant_new_string(value));
+}
+
+// bool GetBoolean(GVariant *value, bool *out_boolean) {
+//     if (g_variant_classify(value) != G_VARIANT_CLASS_BOOLEAN) {
+//         return false;
+//     }
+//     *out_boolean = (g_variant_get_boolean(value) != FALSE);
+//     return true;
+// }
+
+void GSettingsChangedCallback(GSettings *settings,
+                              const gchar *key,
+                              gpointer user_data) {
+    BLOG_DEBUG("GSettingsChangedCallback start");
+}
+
 }  // namespace
 
 PropertyHandler::PropertyHandler()
@@ -34,10 +75,14 @@ PropertyHandler::PropertyHandler()
             prop_output_charset_(nullptr),
             prop_unikey_option_(nullptr),
             prop_unikey_tool_(nullptr),
-            original_input_method_(kInitialInputMethod),
-            original_output_charset_(kInitialOutputCharset),
             is_disabled_(false) {
     BLOG_DEBUG("PropertyHandler constructor start");
+    settings_ = g_settings_new(kIBusUnikeySchema);
+    settings_observer_id_ = g_signal_connect(
+        settings_,
+        "changed",
+        G_CALLBACK(GSettingsChangedCallback),
+        nullptr);
 
     AppendInputMethodPropertyToPanel();
     AppendOutputCharsetPropertyToPanel();
@@ -51,6 +96,14 @@ PropertyHandler::PropertyHandler()
 }
 
 PropertyHandler::~PropertyHandler() {
+    BLOG_DEBUG("PropertyHandler destructor");
+    if (settings_ != nullptr) {
+        if (settings_observer_id_ != 0) {
+            g_signal_handler_disconnect(settings_, settings_observer_id_);
+        }
+        g_object_unref(settings_);
+    }
+
     if (prop_input_method_) {
         // The ref counter will drop to one.
         g_object_unref(prop_input_method_);
@@ -119,10 +172,15 @@ void PropertyHandler::AppendInputMethodPropertyToPanel() {
         return;
     }
 
-    IBusPropList *sub_prop_list = ibus_prop_list_new();
-    const InputMethod initial_method = original_input_method_;
+    GVariant *input_method = g_settings_get_value(settings_,
+                                                  kInputMethodConfig);
+    std::string input_method_description;
+    if (!GetString(input_method, &input_method_description)) {
+        BLOG_ERROR("Cannot get input-method configuration.");
+        return;
+    }
 
-    std::string icon_path_for_panel;
+    IBusPropList *sub_prop_list = ibus_prop_list_new();
     const char *method_symbol = nullptr;
 
     for (size_t i = 0; i < kInputMethodPropertiesSize; ++i) {
@@ -130,7 +188,8 @@ void PropertyHandler::AppendInputMethodPropertyToPanel() {
         IBusText *label = ibus_text_new_from_string(entry.label);
         IBusPropState state = PROP_STATE_UNCHECKED;
 
-        if (entry.input_method == initial_method) {
+        if (entry.key_for_gsettings == input_method_description) {
+            BLOG_DEBUG("State checked for {}", input_method_description);
             state = PROP_STATE_CHECKED;
             method_symbol = entry.label_for_panel;
         }
@@ -342,6 +401,7 @@ void PropertyHandler::ProcessPropertyActivate(IBusEngine *engine,
                 const InputMethodProperty *entry =
                         reinterpret_cast<const InputMethodProperty*>(
                                 g_object_get_data(G_OBJECT(prop), kGObjectDataKey));
+                SetString(settings_, kInputMethodConfig, entry->key_for_gsettings);
                 SetInputMethod(engine, entry->input_method);
                 UpdateInputMethodIcon(engine, entry->input_method);
                 break;
