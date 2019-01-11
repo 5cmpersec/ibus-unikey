@@ -55,6 +55,15 @@ bool GetBoolean(GVariant *value, bool *out_boolean) {
     return true;
 }
 
+bool SetBoolean(GSettings* settings,
+               const gchar* name,
+               gboolean value) {
+    return g_settings_set_value(settings,
+                                name,
+                                g_variant_new_boolean(value));
+}
+
+
 void GSettingsChangedCallback(GSettings *settings,
                               const gchar *key,
                               gpointer user_data) {
@@ -359,10 +368,8 @@ void PropertyHandler::ProcessPropertyActivate(IBusEngine *engine,
                 const OptionProperty *entry = reinterpret_cast<const OptionProperty*>(
                         g_object_get_data(G_OBJECT(prop), kGObjectDataKey));
 
-                options_map_[entry->key] = (property_state == PROP_STATE_CHECKED);
-                for (auto it : options_map_) {
-                    BLOG_DEBUG("{}: {}", it.first, it.second);
-                }
+                bool checked = (property_state == PROP_STATE_CHECKED);
+                SetBoolean(settings_, entry->key_for_gsettings, checked);
                 return;
             }
         }
