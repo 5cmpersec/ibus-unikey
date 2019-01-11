@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 #include "base/port.h"
 #include "unix/ibus/ibus_header.h"
@@ -22,7 +23,6 @@ public:
     virtual void ProcessPropertyActivate(IBusEngine *engine,
                                          const gchar *property_name,
                                          guint property_state);
-    virtual bool IsActivated() const;
     virtual bool IsDisabled() const;
 
 private:
@@ -31,6 +31,8 @@ private:
     void AppendInputMethodPropertyToPanel();
     // Appends output charset properties into panel
     void AppendOutputCharsetPropertyToPanel();
+    // Appends Options properties into panel
+    void AppendOptionPropertyToPanel();
     // Appends tool properties into panel
     void AppendToolPropertyToPanel();
     // Appends switch properties into panel
@@ -42,10 +44,12 @@ private:
     IBusPropList *prop_root_;
     IBusProperty *prop_input_method_;
     IBusProperty *prop_output_charset_;
+    IBusProperty *prop_unikey_option_;
     IBusProperty *prop_unikey_tool_;
 
     InputMethod original_input_method_;
     OutputCharset original_output_charset_;
-    bool is_activated_;
+    std::unordered_map<std::string, bool> options_map_;
+
     bool is_disabled_;
 };

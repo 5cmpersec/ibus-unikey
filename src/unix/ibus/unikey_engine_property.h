@@ -27,16 +27,19 @@ struct OutputCharsetProperty {
     const char *label_for_panel;  // text for the language panel.
 };
 
-// This pointer should be NULL when properties size is 0.
+
 extern const OutputCharsetProperty *kOutputCharsetProperties;
 extern const size_t kOutputCharsetPropertiesSize;
 extern const OutputCharset kInitialOutputCharset;
 
-// The list of charset used in ibus-unikey.
 struct OptionProperty {
     const char *key;    // IBus property key.
     const char *label;  // text for the menu.
+    const bool default_enabled;
 };
+
+extern const OptionProperty *kOptionProperties;
+extern const size_t kOptionPropertiesSize;
 
 struct ToolProperty {
     const char *key;    // IBus property key for the UnikeyTool.
@@ -45,7 +48,6 @@ struct ToolProperty {
     const char *icon;   // icon
 };
 
-// This pointer should be NULL when properties size is 0.
 extern const ToolProperty *kToolProperties;
 extern const size_t kToolPropertiesSize;
 

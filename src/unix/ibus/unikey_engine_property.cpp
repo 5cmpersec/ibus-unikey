@@ -87,6 +87,25 @@ const OutputCharsetProperty kOutputCharsetPropertiesArray[] = {
     },
 };
 
+const OptionProperty kOptionPropertiesArray[] = {
+    {
+        "Option.SpellCheck",
+        "Spell Check",
+        true,
+    },
+    {
+        "Option.FreeMarking",
+        "Free Marking",
+        false,
+    },
+    {
+        "Option.ModernStyle",
+        "Modern Style",
+        true,
+    },
+};
+
+
 const ToolProperty kToolPropertiesArray[] = {
     {
         "Tool.AboutDialog",
@@ -115,3 +134,6 @@ const ToolProperty *kToolProperties = &kToolPropertiesArray[0];
 
 const size_t kToolPropertiesSize = arraysize(kToolPropertiesArray);
 
+const size_t kOptionPropertiesSize = arraysize(kOptionPropertiesArray);
+
+const OptionProperty *kOptionProperties = &kOptionPropertiesArray[0];

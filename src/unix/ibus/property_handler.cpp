@@ -26,35 +26,22 @@ bool GetDisabled(IBusEngine *engine) {
     return disabled;
 }
 
-// Some users expect that IME is turned off by default on IBus 1.5.0 and later.
-// On IBus 1.4.x, IBus expects that an IME should always be turned on and
-// IME on/off keys are handled by IBus itself rather than each IME.
-#if IBUS_CHECK_VERSION(1, 5, 0)
-const bool kActivatedOnLaunch = false;
-#else
-const bool kActivatedOnLaunch = true;
-#endif  // IBus>=1.5.0
-
 }  // namespace
 
 PropertyHandler::PropertyHandler()
         : prop_root_(ibus_prop_list_new()),
             prop_input_method_(nullptr),
             prop_output_charset_(nullptr),
+            prop_unikey_option_(nullptr),
             prop_unikey_tool_(nullptr),
             original_input_method_(kInitialInputMethod),
             original_output_charset_(kInitialOutputCharset),
-            is_activated_(kActivatedOnLaunch),
             is_disabled_(false) {
     BLOG_DEBUG("PropertyHandler constructor start");
-    if (is_activated_) {
-
-    } else {
-
-    }
 
     AppendInputMethodPropertyToPanel();
     AppendOutputCharsetPropertyToPanel();
+    AppendOptionPropertyToPanel();
     AppendToolPropertyToPanel();
 
     // We have to sink |prop_root_| as well so ibus_engine_register_properties()
@@ -255,7 +242,7 @@ void PropertyHandler::AppendToolPropertyToPanel() {
     for (size_t i = 0; i < kToolPropertiesSize; ++i) {
         const ToolProperty &entry = kToolProperties[i];
         IBusText *label = ibus_text_new_from_string(entry.label);
-        IBusProperty *item = ibus_property_new(entry.mode,
+        IBusProperty *item = ibus_property_new(entry.key,
                                                PROP_TYPE_NORMAL,
                                                label,
                                                nullptr /* icon */,
@@ -302,6 +289,44 @@ void PropertyHandler::ProcessPropertyActivate(IBusEngine *engine,
         return;
     }
 
+    if (prop_unikey_option_) {
+        for (guint prop_index = 0; ; ++prop_index) {
+            IBusProperty *prop = ibus_prop_list_get(
+                ibus_property_get_sub_props(prop_unikey_option_), prop_index);
+            if (prop == NULL) {
+                break;
+            }
+            if (!g_strcmp0(property_name, ibus_property_get_key(prop))) {
+                const OptionProperty *entry = reinterpret_cast<const OptionProperty*>(
+                        g_object_get_data(G_OBJECT(prop), kGObjectDataKey));
+
+                options_map_[entry->key] = (property_state == PROP_STATE_CHECKED);
+                for (auto it : options_map_) {
+                    BLOG_DEBUG("{}: {}", it.first, it.second);
+                }
+                return;
+            }
+        }
+    }
+
+    if (prop_unikey_tool_) {
+        for (guint prop_index = 0; ; ++prop_index) {
+            IBusProperty *prop = ibus_prop_list_get(
+                ibus_property_get_sub_props(prop_unikey_tool_), prop_index);
+            if (prop == NULL) {
+                break;
+            }
+            if (!g_strcmp0(property_name, ibus_property_get_key(prop))) {
+                const ToolProperty *entry = reinterpret_cast<const ToolProperty*>(
+                        g_object_get_data(G_OBJECT(prop), kGObjectDataKey));
+
+                BLOG_INFO("Should launch tool: {}", entry->mode);
+                return;
+            }
+        }
+    }
+
+
     if (property_state != PROP_STATE_CHECKED) {
         return;
     }
@@ -343,9 +368,6 @@ void PropertyHandler::ProcessPropertyActivate(IBusEngine *engine,
     }
 }
 
-bool PropertyHandler::IsActivated() const {
-    return is_activated_;
-}
 
 bool PropertyHandler::IsDisabled() const {
     return is_disabled_;
@@ -457,4 +479,58 @@ void PropertyHandler::SetOutputCharset(IBusEngine *engine,
     BLOG_DEBUG("SetOutputCharset");
     Singleton<UnikeyWrapper>::get()->SetOutputCharset(new_charset);
     original_output_charset_ = new_charset;
+}
+
+void PropertyHandler::AppendOptionPropertyToPanel() {
+    BLOG_DEBUG("AppendOptionPropertyToPanel");
+    if (kOptionProperties == nullptr || kOptionPropertiesSize == 0) {
+        return;
+    }
+
+    options_map_["test"] = true;
+    for (auto it : options_map_) {
+        BLOG_DEBUG("{}: {}", it.first, it.second);
+    }
+
+    IBusPropList *sub_prop_list = ibus_prop_list_new();
+
+    for (size_t i = 0; i < kOptionPropertiesSize; ++i) {
+        const OptionProperty &entry = kOptionProperties[i];
+        bool enabled = false;
+        auto it = options_map_.find(entry.key);
+        if (it != options_map_.end()) {
+            enabled = options_map_[entry.key];
+        } else {
+            enabled = entry.default_enabled;
+        }
+
+        IBusPropState state = enabled ? PROP_STATE_CHECKED: PROP_STATE_UNCHECKED;
+        IBusText *label = ibus_text_new_from_string(entry.label);
+        IBusProperty *item = ibus_property_new(entry.key,
+                                               PROP_TYPE_TOGGLE,
+                                               label,
+                                               nullptr /* icon */,
+                                               nullptr /* tooltip */,
+                                               TRUE,
+                                               TRUE,
+                                               state,
+                                               nullptr);
+        g_object_set_data(G_OBJECT(item), kGObjectDataKey, (gpointer)&entry);
+        ibus_prop_list_append(sub_prop_list, item);
+    }
+
+    IBusText *label = ibus_text_new_from_string("Options");
+    prop_unikey_option_ = ibus_property_new("Option",
+                                          PROP_TYPE_MENU,
+                                          label,
+                                          nullptr,
+                                          nullptr /* tooltip */,
+                                          TRUE /* sensitive */,
+                                          TRUE /* visible */,
+                                          PROP_STATE_UNCHECKED,
+                                          sub_prop_list);
+
+      g_object_ref_sink(prop_unikey_option_);
+
+      ibus_prop_list_append(prop_root_, prop_unikey_option_);
 }
