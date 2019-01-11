@@ -237,9 +237,15 @@ void PropertyHandler::AppendOutputCharsetPropertyToPanel() {
         return;
     }
 
-    IBusPropList *sub_prop_list = ibus_prop_list_new();
-    const OutputCharset initial_charset = original_output_charset_;
+    GVariant *output_charset = g_settings_get_value(settings_,
+                                                    kOutputCharsetConfig);
+    std::string charset_description;
+    if (!GetString(output_charset, &charset_description)) {
+        BLOG_ERROR("Cannot get output-charset configuration.");
+        return;
+    }
 
+    IBusPropList *sub_prop_list = ibus_prop_list_new();
     const char *charset_symbol = nullptr;
 
     for (size_t i = 0; i < kOutputCharsetPropertiesSize; ++i) {
@@ -247,7 +253,7 @@ void PropertyHandler::AppendOutputCharsetPropertyToPanel() {
         IBusText *label = ibus_text_new_from_string(entry.label);
         IBusPropState state = PROP_STATE_UNCHECKED;
 
-        if (entry.output_charset == initial_charset) {
+        if (entry.key_for_gsettings == charset_description) {
             state = PROP_STATE_CHECKED;
             charset_symbol = entry.label_for_panel;
         }
@@ -420,6 +426,7 @@ void PropertyHandler::ProcessPropertyActivate(IBusEngine *engine,
                 const OutputCharsetProperty *entry =
                         reinterpret_cast<const OutputCharsetProperty*>(
                                 g_object_get_data(G_OBJECT(prop), kGObjectDataKey));
+                SetString(settings_, kOutputCharsetConfig, entry->key_for_gsettings);
                 SetOutputCharset(engine, entry->output_charset);
                 UpdateOutputCharsetIcon(engine, entry->output_charset);
                 break;
